@@ -5,7 +5,6 @@ from django.http import (HttpResponse,
 from django.shortcuts import redirect 
 from djangohelpers import (rendered_with,
                            allow_http)
-from main.tasks import add_custom_fields, create_actionkit_event
 from actionkit.models import CoreAction
 from main.models import TaskBatch
 from djcelery.models import TaskState
