@@ -1,0 +1,15 @@
+.env
+djmanage.sh
+dev.htpasswd
+dev.sqlite
+bootstrap
+ve
+*~
+*.pyc
+local_settings.py
+.#*
+#*
+*#
+*.db
+/static/
+celeryev.pid

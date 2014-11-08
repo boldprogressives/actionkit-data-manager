@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+{{ form.help_text|safe }}
+
+<hr />
+<form method="GET">
+  {{ form.as_p }}
+
+  <input type="submit" value="Preview" />
+</form>
+
+{% if preview %}
+<table>
+<thead>
+{% with rows.0 as row %}
+<tr>
+{% for cell in row %}
+<th>{{ cell }}</th>
+{% endfor %}
+</tr>
+{% endwith %}
+</thead>
+<tbody>
+{% for row in rows %}
+<tr>
+{% for name, cell in row.items %}
+<td>{{ cell }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+<tbody>
+</table>
+
+{% load helpful_tags %}
+<form method="POST">
+  {% csrf_token %}
+
+  {% for key, val in form.data.items %}
+  <input type="hidden" name="{{ key }}" value="{{ val }}" />
+  {% endfor %}
+
+  <input type="hidden" name="records" value="{{ rows|to_json }}" />
+
+  <input type="submit" value="Save This Job!" />
+</form>
+{% endif %}
+{% endblock %}

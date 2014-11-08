@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+  <div class="page-header">
+    <h1>Choose a Job Type</h1>
+  </div>
+  <div class="row">
+    <div class="span10">
+      {% for link in links %}
+      <div><a href="{{ link.0 }}">{{ link.1 }}</a></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
