@@ -12,13 +12,3 @@ def register_task(slug, description, form_class):
 
 def get_task(slug):
     return tasks[slug]
-
-
-        
-#        (
-#register_task("UserfieldJSONJob", 
-#              "Collect Values, Convert to JSON, and Store Userfield", Userfi),#
-##
-#
-#
-#        )
