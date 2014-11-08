@@ -84,7 +84,7 @@ MIDDLEWARE_CLASSES = (
     'djangohelpers.middleware.AuthRequirementMiddleware',
 )
 
-ANONYMOUS_PATHS = ['/static/', '/admin/']
+ANONYMOUS_PATHS = ['/static/', '/admin/', '/accounts/']
 
 ROOT_URLCONF = 'urls'
 
