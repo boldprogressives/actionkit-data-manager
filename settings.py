@@ -81,7 +81,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'djangohelpers.middleware.AuthRequirementMiddleware',
 )
+
+ANONYMOUS_PATHS = ['/static/', '/admin/']
 
 ROOT_URLCONF = 'urls'
 
