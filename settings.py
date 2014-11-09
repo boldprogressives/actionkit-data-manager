@@ -1,3 +1,6 @@
+import os
+SITE_DOMAIN = os.environ['SITE_DOMAIN']
+
 # Django settings for skel project.
 
 DEBUG = True
