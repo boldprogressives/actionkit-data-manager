@@ -1,4 +1,4 @@
-from main.forms import BatchForm, activity_log, sql_log, success_log, error_log
+from main.forms import BatchForm, get_task_log
 from django import forms
 from actionkit import Client
 from actionkit.rest import client as RestClient
@@ -26,8 +26,9 @@ The SQL must return a column named `user_id`. Userfield Value is optional -- inc
 
         n_rows = n_success = n_error = 0
 
+        task_log = get_task_log()
         for row in rows:
-            sql_log("%s %s" % (unicode(task), row))
+            task_log.sql_log(task, row)
             n_rows += 1
             assert row.get('user_id') and int(row['user_id'])
 
@@ -70,13 +71,13 @@ The SQL must return a column named `user_id`. Userfield Value is optional -- inc
                                 
 
                 resp['log_id'] = row['user_id']
-                success_log("%s %s" % (unicode(task), resp))
+                task_log.success_log(task, resp)
             except Exception, e:
                 n_error += 1
                 resp = {}
                 resp['log_id'] = row['user_id']
                 resp['error'] = traceback.format_exc()
-                error_log("%s %s" % (unicode(task), resp))
+                task_log.error_log(task, resp)
             else:
                 n_success += 1
 
@@ -102,8 +103,10 @@ The SQL must return a column named `actionfield_id`. New Actionfield Name is opt
 
         n_rows = n_success = n_error = 0
 
+        task_log = get_task_log()
+
         for row in rows:
-            sql_log("%s %s" % (unicode(task), row))
+            task_log.sql_log(task, row)
             n_rows += 1
             assert row.get("actionfield_id") and int(row['actionfield_id'])
 
@@ -123,13 +126,13 @@ The SQL must return a column named `actionfield_id`. New Actionfield Name is opt
             try:
                 resp = rest.actionfield.put(actionfield.id, **data)
                 resp['log_id'] = row['actionfield_id']
-                success_log("%s %s" % (unicode(task), resp))
+                task_log.success_log(task, resp)
             except Exception, e:
                 n_error += 1
                 resp = {}
                 resp['log_id'] = row['actionfield_id']
                 resp['error'] = traceback.format_exc()
-                error_log("%s %s" % (unicode(task), resp))
+                task_log.error_log(task, resp)
             else:
                 n_success += 1
 
@@ -159,8 +162,10 @@ each user is marked as acting on.</p>
 
         n_rows = n_success = n_error = 0
 
+        task_log = get_task_log()
+
         for row in rows:
-            sql_log("%s: %s" % (unicode(task), row))
+            task_log.sql_log(task, row)
             n_rows += 1
             assert row.get('user_id') and int(row['user_id'])
             user_id = row['user_id']
@@ -184,13 +189,13 @@ each user is marked as acting on.</p>
             try:
                 resp = ak.act(action)
                 resp['log_id'] = row['user_id']
-                success_log("%s %s" % (unicode(task), resp))
+                task_log.success_log(task, resp)
             except Exception, e:
                 n_error += 1
                 resp = {}
                 resp['log_id'] = row['user_id']
                 resp['error'] = traceback.format_exc()
-                error_log("%s %s" % (unicode(task), resp))
+                task_log.error_log(task, resp)
             else:
                 n_success += 1
 
