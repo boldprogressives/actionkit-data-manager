@@ -1,8 +1,11 @@
 from datetime import datetime
 from django import forms
+from django.conf import settings
 from django.contrib.localflavor.us import forms as usforms
 import traceback
 
+from actionkit import Client
+from actionkit.rest import client as RestClient
 from actionkit.models import CoreUser
 import json
 
@@ -22,12 +25,13 @@ def dictfetchall(cursor):
 
 import logging
 
-logger = logging.getLogger('aktasks')
+from zope.dottedname.resolve import resolve
 
-activity_log = logger.debug
-sql_log = logger.info
-success_log = logger.warn
-error_log = logger.error
+def get_task_log():
+    task_log = resolve(
+        getattr(settings, 'TASKMAN_LOGGER_CLASS', 
+                "main.task_logs.TaskLogger"))
+    return task_log()
 
 class BatchForm(forms.Form):
     help_text = ""
@@ -101,8 +105,8 @@ Note that the order of the rows returned matters a lot.  I cannot stress this en
     def run(self, task, rows):
         userfield_name = self.cleaned_data['userfield_name']
 
-        from actionkit import Client
-        from actionkit.rest import client as RestClient
+        task_log = get_task_log()
+
         ak = Client()
         rest = RestClient()
         rest.safety_net = False
@@ -113,7 +117,7 @@ Note that the order of the rows returned matters a lot.  I cannot stress this en
 
         accumulator = (None, set())
         for row in rows:
-            sql_log("%s %s" % (unicode(task), row))
+            task_log.sql_log(task, row)
             n_rows += 1
             assert row.get('user_id') and int(row['user_id'])
 
@@ -130,7 +134,7 @@ Note that the order of the rows returned matters a lot.  I cannot stress this en
                         resp = {}
                         resp['log_id'] = accumulator[0]
                         resp['error'] = traceback.format_exc()
-                        error_log("%s %s" % (unicode(task), resp))
+                        task_log.error_log(task, resp)
                     else:
                         n_success += 1
                 # Having done that, we'll reset the accumulator.
@@ -157,7 +161,7 @@ Note that the order of the rows returned matters a lot.  I cannot stress this en
                 resp = {}
                 resp['log_id'] = accumulator[0]
                 resp['error'] = traceback.format_exc()
-                error_log("%s %s" % (unicode(task), resp))
+                task_log.error_log(task, resp)
             else:
                 n_success += 1
         return n_rows, n_success, n_error
