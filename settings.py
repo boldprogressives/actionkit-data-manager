@@ -6,9 +6,9 @@ SITE_DOMAIN = os.environ['SITE_DOMAIN']
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+ADMINS = [
+    ("Admin", i) for i in os.environ['ADMIN_EMAILS'].split(",")
+]
 
 MANAGERS = ADMINS
 
@@ -143,6 +143,10 @@ EMAIL_PORT = os.environ['EMAIL_PORT']
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS'] == "True"
+
+ACTIONKIT_API_HOST = os.environ['ACTIONKIT_API_HOST']
+ACTIONKIT_API_USER = os.environ['ACTIONKIT_API_USER']
+ACTIONKIT_API_PASSWORD = os.environ['ACTIONKIT_API_PASSWORD']
 
 import djcelery
 djcelery.setup_loader()
