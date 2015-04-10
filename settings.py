@@ -69,7 +69,7 @@ STATICFILES_FINDERS = (
 )
 
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-DEFAULT_EMAIL_FROM = os.environ['DJANGO_EMAIL_FROM']
+DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
