@@ -141,9 +141,12 @@ BROKER_VHOST = os.environ['BROKER_VHOST']
 
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = os.environ['EMAIL_PORT']
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS') == "True"
+if 'EMAIL_HOST_USER' in os.environ:
+    EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+if 'EMAIL_HOST_PASSWORD' in os.environ:
+    EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+if 'EMAIL_USE_TLS' in os.environ:
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS') == "True"
 
 ACTIONKIT_API_HOST = os.environ['ACTIONKIT_API_HOST']
 ACTIONKIT_API_USER = os.environ['ACTIONKIT_API_USER']
