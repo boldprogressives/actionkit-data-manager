@@ -1,3 +1,4 @@
+import logging
 logger = logging.getLogger('aktasks')
 
 class TaskLogger(object):
