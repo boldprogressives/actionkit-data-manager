@@ -107,6 +107,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'debug_toolbar',
     'djangohelpers',
+    'djsupervisor',
     'djcelery',
     'basic_tasks',
     'main',
