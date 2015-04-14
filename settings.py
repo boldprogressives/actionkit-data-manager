@@ -98,7 +98,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -114,7 +114,12 @@ INSTALLED_APPS = (
     'djcelery',
     'basic_tasks',
     'main',
-    )
+    ]
+
+TASKMAN_PLUGIN_PACKAGES = [i for i in os.environ.get("TASKMAN_PLUGIN_PACKAGES", "").split(",")
+                           if i]
+for app_name in TASKMAN_PLUGIN_PACKAGES:
+    INSTALLED_APPS.append(app_name)
 
 TEMPLATE_LOADERS = (
     'dbtemplates.loader.Loader',
@@ -159,6 +164,15 @@ if 'EMAIL_USE_TLS' in os.environ:
 ACTIONKIT_API_HOST = os.environ['ACTIONKIT_API_HOST']
 ACTIONKIT_API_USER = os.environ['ACTIONKIT_API_USER']
 ACTIONKIT_API_PASSWORD = os.environ['ACTIONKIT_API_PASSWORD']
+
+import importlib
+for app_name in TASKMAN_PLUGIN_PACKAGES:
+    try:
+        d = importlib.import_module('%s.app_settings' % app_name)
+        for value in getattr(d, 'export', []):
+            globals()[value] = getattr(d, value)
+    except Exception:
+        pass
 
 import djcelery
 djcelery.setup_loader()
