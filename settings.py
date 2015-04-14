@@ -104,8 +104,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.flatpages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'dbtemplates',
     'debug_toolbar',
     'djangohelpers',
     'djsupervisor',
@@ -114,6 +116,11 @@ INSTALLED_APPS = (
     'main',
     )
 
+TEMPLATE_LOADERS = (
+    'dbtemplates.loader.Loader',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",

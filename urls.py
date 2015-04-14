@@ -18,3 +18,6 @@ urlpatterns += patterns(
     (r'^accounts/login/$', 'login'),
     (r'^accounts/logout/$', 'logout'),
     )
+urlpatterns += patterns('',
+    (r'^pages/', include('django.contrib.flatpages.urls')),
+)
