@@ -18,9 +18,9 @@ class BatchJob(models.Model):
 
     def __unicode__(self):
         if self.title:
-            return self.title
+            return "%s: %s" % (self.id, self.title)
         else:
-            return u"A %s created by %s on %s" % (self.type, self.created_by, self.created_on)
+            return u"%s: A %s created by %s on %s" % (self.id, self.type, self.created_by, self.created_on)
 
     TYPE_CHOICES = [
         (task.slug, task.description) for task in task_registry.tasks.values() #@@TODO
