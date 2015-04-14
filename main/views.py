@@ -23,6 +23,16 @@ import io
 @allow_http("GET", "POST")
 @rendered_with("main/batch_job.html")
 def batch_job(request, type):
+
+    allowed = False
+    if request.user.is_superuser:
+        allowed = True
+    elif request.user.groups.filter(name=type).exists():
+        allowed = True
+    if not allowed:
+        return HttpResponseForbidden("You do not have permission to access this job. "
+                                     "Please contact an administrator.")
+
     job = BatchJob(created_by=request.user, type=type)
     
     if request.method == "GET":
@@ -47,9 +57,6 @@ def batch_job(request, type):
         preview = True
         return locals()
 
-    import json
-    rows = request.POST['records']
-    
     job.save()
 
     task = JobTask(parent_job=job)
