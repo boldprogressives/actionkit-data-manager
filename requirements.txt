@@ -1,3 +1,4 @@
+django-dbtemplates
 zope.dottedname
 django-dotenv
 dj-database-url
