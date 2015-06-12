@@ -68,10 +68,11 @@ def batch_job(request, type):
     resp['Location'] += '?' + request.META['QUERY_STRING']
     return resp
 
+from main import task_registry
 @allow_http("GET", "POST")
 @rendered_with("main/home.html")
 def home(request):
     links = []
-    for job_type in BatchJob.TYPE_CHOICES:
+    for job_type in task_registry.tasks:
         links.append(("/batch-job/%s/" % job_type[0], job_type[1]))
     return locals()
