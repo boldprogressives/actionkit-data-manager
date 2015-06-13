@@ -73,6 +73,6 @@ from main import task_registry
 @rendered_with("main/home.html")
 def home(request):
     links = []
-    for job_type in task_registry.tasks:
-        links.append(("/batch-job/%s/" % job_type[0], job_type[1]))
+    for job_type in task_registry.tasks.items():
+        links.append(("/batch-job/%s/" % job_type[0], job_type[1].description))
     return locals()
