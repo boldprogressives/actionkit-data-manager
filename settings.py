@@ -120,7 +120,9 @@ TASKMAN_PLUGIN_PACKAGES = [i for i in os.environ.get("TASKMAN_PLUGIN_PACKAGES", 
                            if i]
 for app_name in TASKMAN_PLUGIN_PACKAGES:
     INSTALLED_APPS.append(app_name)
-
+if 'TASKMAN_LOGGER_CLASS' in os.environ:
+    TASKMAN_LOGGER_CLASS = os.environ['TASKMAN_LOGGER_CLASS']
+    
 TEMPLATE_LOADERS = (
     'dbtemplates.loader.Loader',
     'django.template.loaders.filesystem.Loader',
