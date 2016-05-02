@@ -1,0 +1,5 @@
+- name: Apply taskman role
+  hosts: localhost
+  sudo: yes
+  roles:
+    - role: taskman

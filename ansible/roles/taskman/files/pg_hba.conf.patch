@@ -1,0 +1,4 @@
+85c85
+< local   all             postgres                                peer
+---
+> local   all             postgres                                trust

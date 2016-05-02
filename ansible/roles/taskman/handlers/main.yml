@@ -1,0 +1,19 @@
+- name: restart apache2
+  service:
+    name: apache2
+    state: restarted
+
+- name: restart uwsgi
+  service:
+    name: uwsgi
+    state: restarted
+
+- name: restart postgresql
+  service:
+    name: postgresql
+    state: restarted
+
+- name: restart rabbitmq
+  service:
+    name: rabbitmq-server
+    state: started

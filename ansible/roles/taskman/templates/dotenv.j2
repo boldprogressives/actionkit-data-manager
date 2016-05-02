@@ -1,0 +1,27 @@
+SITE_DOMAIN={{ django_site_domain }}
+DJANGO_SECRET_KEY={{ django_secret_key }}
+ADMIN_EMAILS={{ django_admin_emails }}
+DEFAULT_FROM_EMAIL={{ django_email_from }}
+
+BROKER_HOST=localhost
+BROKER_PORT=5672
+BROKER_USER=taskman
+BROKER_PASSWORD={{ broker_password }}
+BROKER_VHOST=taskman
+
+EMAIL_HOST={{ email_host }}
+EMAIL_PORT={{ email_port }}
+{% if email_host_user is defined %}EMAIL_HOST_USER={{ email_host_user }}{% endif %}
+{% if email_host_password is defined %}EMAIL_HOST_PASSWORD={{ email_host_password }}{% endif %}
+{% if email_use_tls is defined %}EMAIL_USE_TLS=True{% endif %}
+
+DATABASE_URL=postgres://postgres@/taskman
+ACTIONKIT_DATABASE_URL={{ actionkit_database_url }}
+
+ACTIONKIT_API_HOST={{ actionkit_api_host }}
+ACTIONKIT_API_USER={{ actionkit_api_user }}
+ACTIONKIT_API_PASSWORD={{ actionkit_api_password }}
+
+{% if taskman_plugin_package_name %}TASKMAN_PLUGIN_PACKAGES = "{{ taskman_plugin_package_name }}"{% endif %}
+
+{% if taskman_logger_class %}TASKMAN_LOGGER_CLASS = "{{ taskman_logger_class }}"{% endif %}

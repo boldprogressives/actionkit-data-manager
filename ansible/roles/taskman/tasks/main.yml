@@ -1,0 +1,254 @@
+- name: Add rabbitmq repo key
+  apt_key:
+    url: https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+    state: present
+
+- name: Add rabbitmq repo
+  apt_repository:
+    repo: 'deb http://www.rabbitmq.com/debian/ testing main'
+    state: present
+    
+- name: Update package list
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Upgrade system packages
+  apt:
+    upgrade: dist
+
+- name: Set Postfix option hostname
+  debconf:
+    name: postifx
+    question: "postfix/mailname"
+    value: "{{ postfix_mailname }}"
+    vtype: "string"
+
+- name: Set Postfix option type as internet site
+  debconf:
+    name: postfix
+    question: "postfix/main_mailer_type"
+    value: "'Internet Site'"
+    vtype: "string"
+
+- name: Install system tools and dependancies
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+  - git
+  - postfix
+  - ntp
+  - dnsutils
+  - python-apt
+  - python-pip
+  - python-dev
+  - python-virtualenv
+  - python-opencv 
+  - python-numpy
+  - build-essential
+  - libpq-dev
+  - python-psycopg2
+  - postgresql
+  - apache2
+  - apache2-utils
+  - libapache2-mod-proxy-uwsgi
+  - uwsgi
+  - uwsgi-plugin-python
+  - libmysqlclient-dev
+  - libsqlite3-dev
+  - rabbitmq-server
+  notify: restart rabbitmq
+
+
+- name: Install useful tools
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+  - vim
+  - htop
+  - iotop
+  - iftop
+  - screen
+  - bash-completion
+  - ipython
+  - multitail
+  - emacs
+
+- name: Add taskman user
+  user:
+    name: taskman
+
+- name: Create ~/.ssh dir for taskman user
+  file:
+    path: "/home/taskman/.ssh"
+    state: directory
+    owner: taskman
+    group: taskman
+
+- name: Disable strict host checking for git clone
+  copy:
+    src: ssh_config
+    dest: /home/taskman/.ssh/config
+
+- name: Make dirs
+  sudo: true
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: taskman
+    recurse: yes
+  with_items:
+    - /var/www/html
+
+- name: Clone taskman repo
+  sudo: true
+  sudo_user: taskman
+  git:
+    repo: https://github.com/boldprogressives/actionkit-data-manager.git
+    dest: /home/taskman/actionkit-data-manager
+    accept_hostkey: true
+    version: "{{ git_version_taskman }}"
+
+- name: Install pip requirements
+  pip:
+    requirements: /home/taskman/actionkit-data-manager/requirements.txt
+
+- name: Install plugin package
+  pip:
+    name: "{{ taskman_plugin_package }}"
+  when: taskman_plugin_package is defined
+
+- name: Start postgres
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Check if db already exists
+  sudo: true
+  sudo_user: postgres
+  shell: "psql -l | grep taskman"
+  ignore_errors: true
+  args:
+    chdir: /home/taskman/actionkit-data-manager/
+  register: db_exists
+
+- name: Create db
+  sudo: true
+  sudo_user: postgres
+  postgresql_db: name=taskman
+  when: db_exists.rc != 0
+
+- name: Copy pg_hba patch
+  sudo: true
+  sudo_user: taskman
+  copy:
+    src=pg_hba.conf.patch
+    dest=/home/taskman/pg_hba.conf.patch
+
+- name: Patch postgres config to trust local connections as postgres user
+  sudo: true
+  command: 'patch -N /etc/postgresql/9.3/main/pg_hba.conf /home/taskman/pg_hba.conf.patch'
+  ignore_errors: yes
+
+- name: Restart postgresql
+  service:
+    name: postgresql
+    state: restarted
+    enabled: true
+
+- name: Add rabbitmq vhost
+  rabbitmq_vhost:
+    name: taskman
+    state: present
+
+- name: Add rabbitmq user
+  rabbitmq_user:
+    user: taskman
+    password: "{{ broker_password }}"
+    vhost: taskman
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    state: present
+
+- name: Copy dotenv environment variable file
+  template:
+    src: "dotenv.j2"
+    dest: "/home/taskman/actionkit-data-manager/.env"
+  notify: restart uwsgi
+  
+- name: Collect static files
+  sudo: true
+  sudo_user: taskman
+  django_manage:
+    command="collectstatic --noinput"
+    app_path=/home/taskman/actionkit-data-manager
+  notify: restart uwsgi
+
+- name: Sync DB
+  sudo: true
+  sudo_user: taskman
+  django_manage:
+    command=syncdb
+    app_path=/home/taskman/actionkit-data-manager
+
+- name: Copy uwsgi conf file
+  copy:
+    src: "uwsgi.ini"
+    dest: "/etc/uwsgi/apps-available/taskman.ini"
+  notify: restart uwsgi
+
+- name: Activate uwsgi conf file
+  file:
+    state: link
+    path: "/etc/uwsgi/apps-enabled/taskman.ini"
+    src: "/etc/uwsgi/apps-available/taskman.ini"
+  notify: restart uwsgi
+
+- name: Remove default apache2 vhost conf file
+  file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  notify: restart apache2
+
+- name: Copy apache2 vhost conf file
+  template:
+    src: "apache.conf.j2"
+    dest: "/etc/apache2/sites-available/taskman.conf"
+  notify: restart apache2
+
+- name: Activate apache2 conf file
+  file:
+    state: link
+    path: "/etc/apache2/sites-enabled/000-taskman.conf"
+    src: "/etc/apache2/sites-available/taskman.conf"
+  notify: restart apache2
+
+- name: Enable proxy module
+  apache2_module:
+    name: proxy
+    state: present
+  notify: restart apache2
+
+- name: Check for supervisor sock
+  stat: path=/tmp/taskman.supervisor.sock
+  register: supervisor_sock
+
+- name: Stop supervisor
+  sudo: true
+  sudo_user: taskman
+  django_manage:
+    command="supervisor shutdown"
+    app_path=/home/taskman/actionkit-data-manager
+  when: supervisor_sock.stat.exists == True
+
+- name: Start supervisor
+  sudo: true
+  sudo_user: taskman
+  django_manage:
+    command="supervisor --daemon"
+    app_path=/home/taskman/actionkit-data-manager
+  notify: restart uwsgi

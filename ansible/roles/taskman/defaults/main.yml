@@ -1,0 +1,19 @@
+---
+import_db: false
+fqdn: taskman
+git_version_taskman: HEAD
+
+django_site_domain: taskman.example.com
+django_secret_key: asdfghjklqwertyuiop
+django_admin_emails: one@example.com,two@example.com
+django_email_from: taskman@example.com
+
+broker_password: password
+
+email_host: localhost
+email_port: 25
+
+actionkit_database_url: mysql://@/ak_demo
+actionkit_api_host: https://roboticdogs.actionkit.com
+actionkit_api_user: api_user
+actionkit_api_password: api_password

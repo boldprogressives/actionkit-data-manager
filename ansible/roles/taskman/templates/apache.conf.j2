@@ -1,0 +1,27 @@
+<VirtualHost *:80>
+#    ServerName {{ fqdn }}
+#    ServerAdmin webmaster@{{ fqdn }}
+    DocumentRoot /var/www/html
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    Alias /static/ /home/taskman/actionkit-data-manager/static/
+    Alias /media/ /home/taskman/actionkit-data-manager/media/
+    <Directory /home/taskman/actionkit-data-manager/static>
+      Require all granted
+      Order allow,deny
+      Allow from all
+    </Directory>
+    <Directory /home/taskman/actionkit-data-manager/media>
+      Require all granted
+      Order allow,deny
+      Allow from all
+    </Directory>
+
+    ProxyPass /static/ !
+    ProxyPass /media/ !
+    
+    ProxyPass   /           uwsgi://localhost:8080/
+
+</VirtualHost>
